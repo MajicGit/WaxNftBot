@@ -1,0 +1,5 @@
+WAX_ACC_PRIVKEY = ""
+WAX_ACC_NAME = "thepinkfairy"
+WAX_PERMISSION ="active"
+DISCORD_BOT_TOKEN = ""
+LOG_CHANNEL = 

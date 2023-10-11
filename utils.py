@@ -170,7 +170,7 @@ try:
         keypair = EosKey()
         priv_key = keypair.to_wif()
         key = keypair.to_public()
-        authorization=[account.authorization('claimlink')]
+        authorization=[account.authorization(settings.WAX_PERMISSION)]
         actions = [
             EosAction(
                     account='atomictoolsx',
@@ -214,7 +214,6 @@ try:
                     ref_block_num=ref_block["block_num"] & 65535,
                     ref_block_prefix=ref_block["ref_block_prefix"],
                     actions=action_array)
-                print("Here")
                 resp = await rpc.sign_and_push_transaction(transaction, keys=[account.key])
                 return resp
             except Exception as e:

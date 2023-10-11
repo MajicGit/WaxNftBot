@@ -12,7 +12,7 @@ intents.messages = True
 intents.dm_messages = True 
 intents.message_content = True
 
-bot = commands.Bot(command_prefix='-', description='Wax Waifus NFT Tipbot', intents = intents)
+bot = commands.Bot(command_prefix=',', description='Wax Waifus NFT Tipbot', intents = intents)
 
 
 
@@ -24,6 +24,7 @@ async def on_ready():
 
 
 @bot.command(name='hi')
+@commands.is_owner()
 async def hi(ctx):
 	print("Hi command")
 	await ctx.send("Hello there")
@@ -32,7 +33,7 @@ async def hi(ctx):
 @commands.is_owner()
 async def load(ctx, cog:str):
 	try:
-		bot.load_extension(cog)
+		await bot.load_extension(cog)
 	except Exception as e:
 		await ctx.send(e)
 	else:
@@ -42,7 +43,7 @@ async def load(ctx, cog:str):
 @commands.is_owner()
 async def unload(ctx, cog:str):
 	try:
-		bot.unload_extension(cog)
+		await bot.unload_extension(cog)
 	except Exception as e:
 		await ctx.send(e)
 	else:
