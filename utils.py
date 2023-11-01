@@ -9,7 +9,7 @@ LIMIT = 1000
 
 
 # List of various wax RPC endpoints
-normal_api_list = ['https://hyperion.oiac.io', 'https://wax.blokcrafters.io', 'https://api-wax.eosauthority.com', 'https://waxapi.ledgerwise.io', 'https://api.wax.greeneosio.com', 'https://wax.cryptolions.io', 'https://wax-api.eosiomadrid.io', 'https://api.wax.liquidstudios.io', 'https://wax.eosusa.io', 'https://wax.eosdac.io', 'https://history-wax-mainnet.wecan.dev', 'https://api.waxeastern.cn', 'https://wax.blacklusion.io', 'https://api.wax.alohaeos.com', 'https://wax.eosdublin.io', 'https://apiwax.3dkrender.com']
+query_normal_api_list = ['https://hyperion.oiac.io', 'https://wax.blokcrafters.io', 'https://api-wax.eosauthority.com', 'https://waxapi.ledgerwise.io', 'https://api.wax.greeneosio.com', 'https://wax.cryptolions.io', 'https://wax-api.eosiomadrid.io', 'https://api.wax.liquidstudios.io', 'https://wax.eosusa.io', 'https://wax.eosdac.io', 'https://history-wax-mainnet.wecan.dev', 'https://api.waxeastern.cn', 'https://wax.blacklusion.io', 'https://api.wax.alohaeos.com', 'https://wax.eosdublin.io', 'https://apiwax.3dkrender.com']
 
 # eosusa, ledgerwise and eosdac seem to only return limited history, so we don't want to use them in those cases.
 normal_api_list_decent_history = ['https://wax.eu.eosamsterdam.net', 'https://wax.blokcrafters.io', 'https://api-wax.eosauthority.com', 'https://api.wax.greeneosio.com', 'https://wax.cryptolions.io', 'https://wax-api.eosiomadrid.io', 'https://api.wax.liquidstudios.io', 'https://history-wax-mainnet.wecan.dev', 'https://api.waxeastern.cn', 'https://api.wax.alohaeos.com', 'https://wax.eosdublin.io', 'https://apiwax.3dkrender.com']
@@ -34,7 +34,7 @@ light_nodes = ['https://eos.light-api.net', 'https://instar.light-api.net', 'htt
 
 
 # Prefer these for e.g. retrieving a transaction as ultimately faster
-normal_to_spam = [x for x in normal_api_list if x not in high_limit_list]
+normal_to_spam = [x for x in query_normal_api_list if x not in high_limit_list]
 
 # How many requests made and how many succesfull. To evaluate API choice.
 tried_requests = {}
@@ -51,10 +51,9 @@ api_ratelimit = {}
 # 3
 
 # Initialize parameters for all our API lists.
-for i in normal_api_list + fast_aa_api_list + high_limit_list:
+for i in query_normal_api_list + fast_aa_api_list + high_limit_list:
     tried_requests[i] = [0, 0]
     api_info[i] = {"last_failed": 0, "last_tried": 0, "mutex": Lock(), "ratelimit": 1}
-
 
 async def do_request(session, request, post_data=None, timeout: float = 10) -> dict:
     if post_data == None:
@@ -65,7 +64,7 @@ async def do_request(session, request, post_data=None, timeout: float = 10) -> d
             return await response.json(content_type=None)
 
 
-async def try_api_request(request: str, endpoints=normal_api_list, post_body=None, session=None) -> dict:
+async def try_api_request(request: str, endpoints=query_normal_api_list, post_body=None, session=None) -> dict:
     """ Function that iterates through a list of specified endpoints and tries the specified request until one of them is succesfull"""
     backoff_factor = 0  # Backoff factor for this request
     if session == None:
@@ -142,11 +141,7 @@ async def try_api_request(request: str, endpoints=normal_api_list, post_body=Non
                 continue
             tried_requests[current_api][1] += 1
             api_info[current_api]["ratelimit"] = 1  # Reset ratelimit upon a succesfull request
-            try: 
-                if len(data['data']) == 0 and False:
-                    print(current_api)
-            except:
-                pass 
+
          #   print(full_req)
             return data
 
@@ -190,16 +185,19 @@ try:
                     data={"from": account.name, "to": "atomictoolsx", "asset_ids": asset_id, "memo": "link"},
                 )
             ]
-        print(actions)
         resp = await doAction(actions, api_rpc, account)
-        print(resp)
         if resp == False:
             raise Exception("Failed to create claimlink, please try again")
         tx_id = resp["transaction_id"]
-        newresp = await try_api_request(f"/v2/history/get_transaction?id={tx_id}", normal_api_list)
-        if "link_id" not in newresp:
-            print("Weird - please debug! Error")
-            newresp = resp 
+        try:
+            newresp = await try_api_request(f"/v2/history/get_transaction?id={tx_id}", query_normal_api_list)
+            if "link_id" not in str(newresp):
+                print("Weird - please debug! Error")
+                print(newresp)
+                newresp = resp 
+        except Exception as e:
+            print("Exception getting trx", e)
+            newresp = resp
         link_id = str(newresp).split("link_id': ")[1].split(',')[0]
         link = f'https://wax.atomichub.io/trading/link/{link_id}?key={priv_key}'
         return link
