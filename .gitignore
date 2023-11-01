@@ -2,3 +2,5 @@
 *.pyc
 *.pyc
 settings.py
+*.pyc
+*.pyc

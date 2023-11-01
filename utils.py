@@ -195,7 +195,12 @@ try:
         print(resp)
         if resp == False:
             raise Exception("Failed to create claimlink, please try again")
-        link_id = str(resp).split("link_id': ")[1].split(',')[0]
+        tx_id = resp["transaction_id"]
+        newresp = await try_api_request(f"/v2/history/get_transaction?id={tx_id}", normal_api_list)
+        if "link_id" not in newresp:
+            print("Weird - please debug! Error")
+            newresp = resp 
+        link_id = str(newresp).split("link_id': ")[1].split(',')[0]
         link = f'https://wax.atomichub.io/trading/link/{link_id}?key={priv_key}'
         return link
     
