@@ -22,14 +22,14 @@ class Drop(commands.Cog):
                 return
             to_send = secrets.choice(available_assets)['asset_id']
             
-            claimlink = await utils.gen_claimlink([to_send], memo = memo) 
+            claimlink = await utils.gen_claimlink([to_send], memo = memo + " Remember to claim this link, otherwise all unclaimed links will be reclaimed by The Pink Fairy after 31 days!") 
             print(claimlink)
 
             if "https://wax.atomichub.io/trading/link/" not in claimlink:
                 await ctx.send(f"Link generation failed! {claimlink}. Please try again and/or ping Majic")
 
 
-            user_message = f"""Congratulations, the Pink Fairy sent you a random NFT!\nYou can claim it by clicking the following link (just login with your wax_chain wallet, might require allowing popups): {claimlink}\n**WARNING: Anyone you share this link with can claim it, so, do not share with anyone if you do not want to give the NFT away!**\n__Also, please, avoid scams:__\n- Before clicking a claim link, ensure the top level domain is atomichub.io.\n- As an additional security measure, make sure I pinged you in ⁠waxwaifus.\n- If you feel insecure, ask a Bouncer or Bodyguard in our main chat.\nThere is more information about my home collection at <https://waxwaifus.carrd.com/>.\nEnjoy your gift and always feel free to ask any questions, please!"""
+            user_message = f"""Congratulations, the Pink Fairy sent you a random NFT!\nYou can claim it by clicking the following link (just login with your wax_chain wallet, might require allowing popups): {claimlink}\n**WARNING: Anyone you share this link with can claim it, so, do not share with anyone if you do not want to give the NFT away!**\n__Also, please, avoid scams:__\n- Before clicking a claim link, ensure the top level domain is atomichub.io.\n- If you feel insecure, ask a Bouncer or Bodyguard in our main chat.\nThere is more information about my home collection at <https://waxwaifus.carrd.com/>.\nEnjoy your gift and always feel free to ask any questions, please!\nRemember to claim this link, otherwise all unclaimed links will be reclaimed by The Pink Fairy after 31 days!"""
             await member.send(user_message)
             await ctx.message.add_reaction("📪")    
             log_message = f"User {member.name} received claimlink {claimlink.split('?key')} from {ctx.author.name}."

@@ -209,7 +209,7 @@ try:
         for i in range(0, retry):
             try:
                 rpc = api_rpc[index]
-                if ref_block == {} or i > 0:
+                if len(ref_block) == 0 or i > 0:
                     block = await rpc.get_head_block()
                     ref_block["block_num"] = block['block_num']
                     ref_block["ref_block_prefix"] = block['ref_block_prefix']
