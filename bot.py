@@ -53,8 +53,8 @@ async def unload(ctx, cog:str):
 @commands.is_owner()
 async def reload(ctx, cog:str):
 	try:
-		bot.unload_extension(cog)
-		bot.load_extension(cog)
+		await bot.unload_extension(cog)
+		await bot.load_extension(cog)
 	except Exception as e:
 		await ctx.send(e)
 	else:
