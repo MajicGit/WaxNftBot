@@ -198,8 +198,14 @@ try:
         except Exception as e:
             print("Exception getting trx", e)
             newresp = resp
-        link_id = str(newresp).split("link_id': '")[1].split("'")[0]
-        link = f'https://wax.atomichub.io/trading/link/{link_id}?key={priv_key}'
+        try:
+            link_id = str(newresp).split("link_id': '")[1].split("'")[0]
+            link = f'https://wax.atomichub.io/trading/link/{link_id}?key={priv_key}'
+        except Exception as e:
+            print("Exception getting trx", e)
+            newresp = resp
+            link_id = str(newresp).split("link_id': '")[1].split("'")[0]
+            link = f'https://wax.atomichub.io/trading/link/{link_id}?key={priv_key}'
         return link
     
     async def doAction(action_array, api_rpc, account, ref_block={}, index=None, retry = 5):
