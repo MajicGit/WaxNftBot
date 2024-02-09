@@ -152,10 +152,10 @@ async def try_api_request(request: str, endpoints=query_normal_api_list, post_bo
         await asyncio.sleep(2.5 * backoff_factor)
 
 try:
-    from aioeos.contracts import eosio_token
-    from aioeos.exceptions import EosAssertMessageException, EosRpcException
-    from aioeos.rpc import ERROR_NAME_MAP
-    from aioeos import EosTransaction, EosKey, EosJsonRpc, EosAction, serializer, EosAccount
+    from aioeosabi.contracts import eosio_token
+    from aioeosabi.exceptions import EosAssertMessageException, EosRpcException
+    from aioeosabi.rpc import ERROR_NAME_MAP
+    from aioeosabi import EosTransaction, EosKey, EosJsonRpc, EosAction, serializer, EosAccount
     import settings 
 
     normal_api_list = ["https://wax.pink.gg", "https://wax.eu.eosamsterdam.net", 'https://api.wax.liquidstudios.io', 'https://api.wax.bountyblok.io']

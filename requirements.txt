@@ -1,2 +1,2 @@
-aioeos==1.0.2
+aioeosabi
 discord.py==2.3.2
