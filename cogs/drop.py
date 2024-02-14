@@ -32,7 +32,7 @@ class Drop(commands.Cog):
             user_message = f"""Congratulations, the Pink Fairy sent you a random NFT!\nYou can claim it by clicking the following link (just login with your wax_chain wallet, might require allowing popups): {claimlink}\n**WARNING: Anyone you share this link with can claim it, so, do not share with anyone if you do not want to give the NFT away!**\n__Also, please, avoid scams:__\n- Before clicking a claim link, ensure the top level domain is atomichub.io.\n- As an additional security measure, make sure you were pinged in ⁠waxwaifus.\n- If you feel insecure, ask a Bouncer or Bodyguard in our main chat.\nThere is more information about my home collection at <https://waxwaifus.carrd.com/>.\nEnjoy your gift and always feel free to ask any questions, please!\nRemember to claim this link, otherwise all unclaimed links will be reclaimed by The Pink Fairy after 31 days!"""
             await member.send(user_message)
             await ctx.message.add_reaction("📪")    
-            log_message = f"User {member.name} received claimlink {claimlink.split('?key')} from {ctx.author.name}."
+            log_message = f"User {member.name} received claimlink {claimlink.split('?key')[0]} from {ctx.author.name}. Reason: {memo}"[0:969]
             channel = self.bot.get_channel(settings.LOG_CHANNEL)
             await channel.send(log_message)
             await ctx.message.add_reaction("💌")    

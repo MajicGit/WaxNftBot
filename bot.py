@@ -18,7 +18,7 @@ bot = commands.Bot(command_prefix=',', description='Wax Waifus NFT Tipbot', inte
 
 @bot.event
 async def on_ready():
-	for cog in ['cogs.drop']:
+	for cog in ['cogs.drop', 'cogs.schema']:
 		await bot.load_extension(cog)
 	print(f'We have logged in as {bot.user}')
 
