@@ -16,7 +16,6 @@ class Drop(commands.Cog):
         try:
             await ctx.message.add_reaction("📬")
             available_assets = (await utils.try_api_request(f"/atomicassets/v1/assets?owner={settings.WAX_ACC_NAME}&page=1&limit=1000",endpoints=utils.aa_api_list))['data']
-            print(available_assets)
             if len(available_assets) == 0:
                 await ctx.send(f"Error sending claimlink: No thewaxwaifu assets in wallet {settings.WAX_ACC_NAME} found")
                 return
@@ -37,7 +36,7 @@ class Drop(commands.Cog):
             await channel.send(log_message)
             await ctx.message.add_reaction("💌")    
         except Exception as e:
-            await ctx.send(f"Ran into an error creating claimlink {e}\n")
+            await ctx.send(f"Ran into an error creating claimlink: {e}\n")
 
 async def setup(bot):
 	await bot.add_cog(Drop(bot))

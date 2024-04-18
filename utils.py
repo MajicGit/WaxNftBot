@@ -185,25 +185,25 @@ try:
                     data={"from": account.name, "to": "atomictoolsx", "asset_ids": asset_id, "memo": "link"},
                 )
             ]
-        resp = await doAction(actions, api_rpc, account)
+        resp, msg = await doAction(actions, api_rpc, account)
         if resp == False:
-            raise Exception("Failed to create claimlink, please try again")
-        tx_id = resp["transaction_id"]
+            raise Exception(f"Failed to create claimlink, please try again. Error: {msg}")
+        tx_id = msg["transaction_id"]
         try:
             newresp = await try_api_request(f"/v2/history/get_transaction?id={tx_id}", query_normal_api_list)
             if "link_id" not in str(newresp):
                 print("Weird - please debug! Error")
                 print(newresp)
-                newresp = resp 
+                newresp = msg 
         except Exception as e:
             print("Exception getting trx", e)
-            newresp = resp
+            newresp = msg
         try:
             link_id = str(newresp).split("link_id': '")[1].split("'")[0]
             link = f'https://wax.atomichub.io/trading/link/{link_id}?key={priv_key}'
         except Exception as e:
             print("Exception getting trx", e)
-            newresp = resp
+            newresp = msg
             link_id = str(newresp).split("link_id': '")[1].split("'")[0]
             link = f'https://wax.atomichub.io/trading/link/{link_id}?key={priv_key}'
         return link
@@ -224,17 +224,17 @@ try:
                     ref_block_prefix=ref_block["ref_block_prefix"],
                     actions=action_array)
                 resp = await rpc.sign_and_push_transaction(transaction, keys=[account.key])
-                return resp
+                return True, resp
             except Exception as e:
                 try:
                     if e.args[0]['code'] == 3050003:
                         try:
-                            if "assertion failure with message: Received lower than minTokenOut:" in e.args[0]['details'][0]['message']:
-                                return False
+                            if "has insufficient ram;" in e.args[0]['details'][0]['message']:
+                                return False, "Failed to create claimlink"
                         except:
                             pass
                         print(e)
-                        return False
+                        return False, "Unknown error when creating transaction"
                 except:
                     print(e)
                 print("Failed, will try again; ", i, e)
@@ -243,7 +243,7 @@ try:
                 index += 1
                 index = index % len(api_rpc)
 
-        return False
+        return False, "Wax endpoints acting up with creation of transaction"
 
     async def transfer(from_addr, to_addr, asset_ids, api_rpc, account, memo=""):
         """
