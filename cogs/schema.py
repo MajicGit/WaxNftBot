@@ -5,7 +5,7 @@ import utils
 import settings
 import json
 
-async def fetch_schemas(collection_name="thewaxwaifus"):
+async def fetch_schemas(collection_name=settings.COLLECTION_NAME):
     r = await utils.try_api_request(f"/atomicassets/v1/schemas?collection_name={collection_name}", endpoints=utils.fast_aa_api_list)
     return r['data']
 
@@ -26,28 +26,21 @@ async def fetch_schemas(collection_name="thewaxwaifus"):
         #     "default": null
         #   }
 
-async def query_templates(schema_name,collection_name="thewaxwaifus"):
+async def query_templates(schema_name,collection_name=settings.COLLECTION_NAME):
     r = await utils.try_api_request(f"/atomicassets/v1/templates?collection_name={collection_name}&schema_name={schema_name}&has_assets=true", endpoints=utils.fast_aa_api_list)
     return r['data']
 
 
-def is_special(template_id):
-    id = int(template_id)
-    if id == 733834:
-        return "Tier One"
-    if id in [765691, 765692, 765693]:
-        return "Tier Two"
-    return "0"
 
 async def gen_schema():
-    to_ignore = [738538]
+    to_ignore = settings.TEMPLATE_TO_IGNORE
     schemas = [] 
     templates = [] 
     all_schemas = [] 
     for i in await fetch_schemas():
         name = i['schema_name']
         all_schemas.append(name)
-        for j in await query_templates(name,"thewaxwaifus"):
+        for j in await query_templates(name, settings.COLLECTION_NAME):
             template_id = j['template_id']
             if int(template_id) in to_ignore:
                 continue
@@ -55,11 +48,11 @@ async def gen_schema():
                 card_name = j['immutable_data']['name']
             except:
                 try:
-                    card_name = (await utils.try_api_request(f"/atomicmarket/v1/assets?collection_name=thewaxwaifus&template_id={template_id}&page=1&limit=11&order=desc&sort=asset_id", endpoints=utils.fast_aa_api_list))['data'][0]['data']['name'].split("-#")[0]
+                    card_name = (await utils.try_api_request(f"/atomicmarket/v1/assets?collection_name={settings.COLLECTION_NAME}&template_id={template_id}&page=1&limit=11&order=desc&sort=asset_id", endpoints=utils.fast_aa_api_list))['data'][0]['data']['name'].split("-#")[0]
                 except Exception as e:
                     print(e)
                     continue 
-            special = is_special(template_id)
+            special = settings.is_special(template_id)
             if special == "0":
                 card_data = {"name": card_name, "template_ids":[template_id],"schema_name":name,"data":{},"attributes":[]}
             else:
@@ -68,9 +61,7 @@ async def gen_schema():
         
 
 
-    done_schemas = ["waxwaifus", "pixelwaifus", "blendurwaifu", "waifucosplay", "waifurewards", "waxwaifupack", "waifuidcards", "waifupromos", "waifucustoms"]
-
-    schemas_alone = [["pixelwaifus", "Pixel Waifus"],["blendurwaifu", "Blendur Waifus"], ["waifucosplay","Waifu Cosplay"], ["waifurewards","Waifu Rewards"], ["waifupromos", "Waifu Promos"], ["waifucustoms", "Waifu Customs"], ["waxwaifupack", "Waifu Packs"], ["waifuidcards", "ID Cards"]] + [[i,i] for i in all_schemas if i not in done_schemas]
+    schemas_alone = list(settings.SCHEMA_NAME_MAP.items()) + [[i,i] for i in all_schemas if i not in settings.SCHEMA_NAME_MAP and i not in settings.SCHEMAS_GROUPED]
     for i in schemas_alone:
         print(i)
         actual_name = i[0]
@@ -86,12 +77,10 @@ async def gen_schema():
 
 
 
-    schemas_together = [["Waifus", [["Tier Two", "Tier Two"], ["Tier One", "Tier One"]]]] # ["Moff Moff Dragum!", [["ingame","In game items"],["badge","Badges"],["moff_token","Tokens!"],["special badge","Special Badges!"]]]]
-
-    for i in schemas_together:
-        display_name = i[0] 
+    for i in settings.SCHEMAS_GROUPED:
+        display_name = i
         filter_list = []
-        for j in i[1]:
+        for j in settings.SCHEMAS_GROUPED[i]:
             group_name = j[0]
             display = j[1] 
             cur_filter = {
@@ -107,8 +96,8 @@ async def gen_schema():
         schemas.append(schema_data)
 
 
-    final = {"name": "Wax Waifus", "data":templates, "series":schemas}
-    with open("thewaxwaifus.json", "w") as outfile:
+    final = {"name": settings.DISPLAY_COLLECTION_NAME, "data":templates, "series":schemas}
+    with open(f"{settings.COLLECTION_NAME}_schema.json", "w") as outfile:
         json.dump(final,outfile)
 
 
@@ -118,14 +107,15 @@ class Schema(commands.Cog):
         self.bot = bot  
         print("Schema cog loaded")
 		
-    @commands.command(description="Get AH Collection Book.",
+    @commands.command(description="Get AH Collection Book",
                       aliases=["collectionbook"])
-    @commands.has_any_role(1138222735827423252, 1137852719328137317, 1019942433485754488)
+    @commands.has_any_role(*settings.DROP_ROLES)
     async def schema(self, ctx):
         try:
             await ctx.message.add_reaction("👀")
             await gen_schema()
-            await ctx.send("Generated Schema File", file=discord.File('thewaxwaifus.json'))    
+            await ctx.send("Generated Schema File", file=discord.File(f"{settings.COLLECTION_NAME}_schema.json"))    
+            await ctx.message.add_reaction("✔️")
         except Exception as e:
             await ctx.send(f"Ran into an error {e} please ping Majic\n")
 

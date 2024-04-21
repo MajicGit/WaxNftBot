@@ -5,6 +5,7 @@ import time
 import aiohttp
 from threading import Lock
 import random
+from typing import List
 LIMIT = 1000
 
 
@@ -161,7 +162,7 @@ try:
     normal_api_list = ["https://wax.pink.gg", "https://wax.eu.eosamsterdam.net", 'https://api.wax.liquidstudios.io', 'https://api.wax.bountyblok.io']
     api_rpc = [EosJsonRpc(url=addr) for addr in normal_api_list]
     account = EosAccount(settings.WAX_ACC_NAME, private_key= settings.WAX_ACC_PRIVKEY)
-    async def gen_claimlink(asset_id: [int], account: EosAccount = account, memo=None):
+    async def gen_claimlink(asset_id: List[int], account: EosAccount = account, memo=None):
         keypair = EosKey()
         priv_key = keypair.to_wif()
         key = keypair.to_public()

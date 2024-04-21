@@ -12,13 +12,13 @@ intents.messages = True
 intents.dm_messages = True 
 intents.message_content = True
 
-bot = commands.Bot(command_prefix=',', description='Wax Waifus NFT Tipbot', intents = intents)
+bot = commands.Bot(command_prefix=settings.BOT_PREFIX, description=settings.BOT_DESCRIPTION, intents = intents)
 
 
 
 @bot.event
 async def on_ready():
-	for cog in ['cogs.drop', 'cogs.schema']:
+	for cog in ['cogs.drop', 'cogs.schema', 'cogs.chatloot']:
 		await bot.load_extension(cog)
 	print(f'We have logged in as {bot.user}')
 
@@ -29,7 +29,7 @@ async def hi(ctx):
 	print("Hi command")
 	await ctx.send("Hello there")
 
-@bot.command() #The next three commands allow you to load/unload cogs on the fly. You must set up bot.owner_id for these to work.
+@bot.command()
 @commands.is_owner()
 async def load(ctx, cog:str):
 	try:

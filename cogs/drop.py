@@ -1,40 +1,50 @@
 import discord
 from discord.ext import commands
-from typing import Union
 import utils 
 import settings
 import secrets
+import time 
+
 class Drop(commands.Cog):
     def __init__(self, bot):
-        self.bot = bot  
+        self.bot = bot
+        self.drops_used = {}
         print("Drop cog loaded")
 		
     @commands.command(description="Send the specified discord user a claim link with a random NFT per DM.",
                       aliases=["loot","reward"])
-    @commands.has_any_role(1138222735827423252, 1137852719328137317, 1019942433485754488)
-    async def drop(self, ctx, member: discord.Member, *, memo: str = "Congratulations you've won a random Waifu NFT!"):
+    @commands.has_any_role(*settings.DROP_ROLES)
+    async def drop(self, ctx, member: discord.Member, *, memo: str = settings.DEFAULT_DROP_MEMO):
         try:
-            await ctx.message.add_reaction("📬")
+            await ctx.message.add_reaction(settings.react_emoji_sequence[0])
+            #Check user has drops available
+            if ctx.author.id not in self.drops_used:
+                 self.drops_used[ctx.author.id] = set()
+            filtered_timestamps = {ts for ts in self.drops_used[ctx.author.id] if ts >= time.time() - (24*60*60)}
+            self.drops_used[ctx.author.id]  = filtered_timestamps
+            if len(self.drops_used[ctx.author.id]) > settings.DAILY_DROP_LIMIT:
+                 await ctx.send(f"Error sending claimlink: You've used up your daily limit.")
+            self.drops_used[ctx.author.id].add(int(time.time()))
+            
             available_assets = (await utils.try_api_request(f"/atomicassets/v1/assets?owner={settings.WAX_ACC_NAME}&page=1&limit=1000",endpoints=utils.aa_api_list))['data']
             if len(available_assets) == 0:
-                await ctx.send(f"Error sending claimlink: No thewaxwaifu assets in wallet {settings.WAX_ACC_NAME} found")
+                await ctx.send(f"Error sending claimlink: No assets in wallet {settings.WAX_ACC_NAME} found.")
                 return
             to_send = secrets.choice(available_assets)['asset_id']
             
-            claimlink = await utils.gen_claimlink([to_send], memo = memo + " Remember to claim this link, otherwise all unclaimed links will be reclaimed by The Pink Fairy after 31 days!") 
+            claimlink = await utils.gen_claimlink([to_send], memo = memo + settings.DROP_EXTRA_INFO) 
             print(claimlink)
 
             if "https://wax.atomichub.io/trading/link/" not in claimlink:
                 await ctx.send(f"Link generation failed! {claimlink}. Please try again and/or ping Majic")
 
-
-            user_message = f"""Congratulations, the Pink Fairy sent you a random NFT!\nYou can claim it by clicking the following link (just login with your wax_chain wallet, might require allowing popups): {claimlink}\n**WARNING: Anyone you share this link with can claim it, so, do not share with anyone if you do not want to give the NFT away!**\n__Also, please, avoid scams:__\n- Before clicking a claim link, ensure the top level domain is atomichub.io.\n- As an additional security measure, make sure you were pinged in ⁠waxwaifus.\n- If you feel insecure, ask a Bouncer or Bodyguard in our main chat.\nThere is more information about my home collection at <https://waxwaifus.carrd.com/>.\nEnjoy your gift and always feel free to ask any questions, please!\nRemember to claim this link, otherwise all unclaimed links will be reclaimed by The Pink Fairy after 31 days!"""
+            user_message = settings.link_to_message(claimlink)
             await member.send(user_message)
-            await ctx.message.add_reaction("📪")    
+            await ctx.message.add_reaction(settings.react_emoji_sequence[1])    
             log_message = f"User {member.name} received claimlink {claimlink.split('?key')[0]} from {ctx.author.name}. Reason: {memo}"[0:969]
             channel = self.bot.get_channel(settings.LOG_CHANNEL)
             await channel.send(log_message)
-            await ctx.message.add_reaction("💌")    
+            await ctx.message.add_reaction(settings.react_emoji_sequence[2])    
         except Exception as e:
             await ctx.send(f"Ran into an error creating claimlink: {e}\n")
 
