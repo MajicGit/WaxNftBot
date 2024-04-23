@@ -20,6 +20,7 @@ class Chatloot(commands.Cog):
         self.last_seen_messages = []
         self.last_seen_users = {}
         self.last_dropped_time = {}
+        self.winning_probability = settings.CHATLOOT_PROBABILITY
         print("Chatloot cog loaded")
 
     def is_spam(self, message, author):
@@ -61,8 +62,9 @@ class Chatloot(commands.Cog):
                 return 
             if userid in self.last_dropped_time and self.last_dropped_time[userid] + settings.CHATLOOT_COOLDOWN > int(time.time()):
                 return   
-            if secrets.randbelow(settings.CHATLOOT_PROBABILITY) != 1:
+            if secrets.randbelow(self.winning_probability) != 1:
                 return 
+            self.winning_probability = settings.CHATLOOT_PROBABILITY
             self.last_dropped_time[userid] = int(time.time())
             await message.add_reaction(settings.react_emoji_sequence[0])
             available_assets = (await utils.try_api_request(f"/atomicassets/v1/assets?owner={settings.WAX_ACC_NAME}&page=1&limit=1000",endpoints=utils.aa_api_list))['data']
@@ -88,9 +90,30 @@ class Chatloot(commands.Cog):
             await message.channel.send(f"Ran into an error. Please ping Majic!: {e}\n")
 
 
+    @commands.command(description="Increase probability of chatloot until next drop occurs.",
+                      aliases=["randomloot"])
+    @commands.has_any_role(*settings.DROP_ROLES)
+    async def chatlootdrop(self, ctx, probability: str):
+        try:
+            await ctx.message.add_reaction(settings.react_emoji_sequence[0])
+            #Check user has drops available
+            try:
+                int_proba = int(probability)
+            except:
+                await ctx.send(f"Error adjusting probability {probability} isn't a valid natural number")
+            if ctx.author.id not in self.bot.drops_used:
+                 self.bot.drops_used[ctx.author.id] = set()
+            filtered_timestamps = {ts for ts in self.bot.drops_used[ctx.author.id] if ts >= time.time() - (24*60*60)}
+            self.bot.drops_used[ctx.author.id]  = filtered_timestamps
+            if len(self.bot.drops_used[ctx.author.id]) > settings.DAILY_DROP_LIMIT:
+                 await ctx.send(f"Error adjusting probability: You've used up your daily limit.")
+            self.bot.drops_used[ctx.author.id].add(int(time.time()))
+            self.winning_probability = max(int_proba,2)
+            await ctx.message.add_reaction(settings.react_emoji_sequence[2])
+        except Exception as e:
+            await ctx.send(f"Ran into an error. Please ping Majic!: {e}\n")
+
 
 async def setup(bot):
 	await bot.add_cog(Chatloot(bot))
-
-#Track last 50 seen messages, last 10 seen users and filter out any duplicates.
 

@@ -8,7 +8,7 @@ import time
 class Drop(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.drops_used = {}
+        bot.drops_used = {}
         print("Drop cog loaded")
 		
     @commands.command(description="Send the specified discord user a claim link with a random NFT per DM.",
@@ -18,13 +18,13 @@ class Drop(commands.Cog):
         try:
             await ctx.message.add_reaction(settings.react_emoji_sequence[0])
             #Check user has drops available
-            if ctx.author.id not in self.drops_used:
-                 self.drops_used[ctx.author.id] = set()
-            filtered_timestamps = {ts for ts in self.drops_used[ctx.author.id] if ts >= time.time() - (24*60*60)}
-            self.drops_used[ctx.author.id]  = filtered_timestamps
-            if len(self.drops_used[ctx.author.id]) > settings.DAILY_DROP_LIMIT:
+            if ctx.author.id not in self.bot.drops_used:
+                 self.bot.drops_used[ctx.author.id] = set()
+            filtered_timestamps = {ts for ts in self.bot.drops_used[ctx.author.id] if ts >= time.time() - (24*60*60)}
+            self.bot.drops_used[ctx.author.id]  = filtered_timestamps
+            if len(self.bot.drops_used[ctx.author.id]) > settings.DAILY_DROP_LIMIT:
                  await ctx.send(f"Error sending claimlink: You've used up your daily limit.")
-            self.drops_used[ctx.author.id].add(int(time.time()))
+            self.bot.drops_used[ctx.author.id].add(int(time.time()))
             
             available_assets = (await utils.try_api_request(f"/atomicassets/v1/assets?owner={settings.WAX_ACC_NAME}&page=1&limit=1000",endpoints=utils.aa_api_list))['data']
             if len(available_assets) == 0:
