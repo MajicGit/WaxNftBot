@@ -4,3 +4,5 @@
 settings.py
 *.pyc
 *.pyc
+settings_skunky.py
+settings_goofballs.py
