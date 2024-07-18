@@ -57,6 +57,8 @@ class Chatloot(commands.Cog):
                     return 
             except:
                 return
+            if message.author.bot:
+                return 
             userid = message.author.id
             if self.is_spam(message.content, userid):
                 return 
