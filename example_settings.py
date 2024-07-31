@@ -28,7 +28,7 @@ TEMPLATE_TO_IGNORE = [] #Templates to not include in collection book
 SCHEMA_NAME_MAP = {"pixelwaifus": "Pixel Waifus"}
 #Schemas that are grouped together.
 SCHEMAS_GROUPED = {"Waifus": {"Tier Two": "Tier Two", "Tier One": "Tier One"}}
-
+SCHEMA_IGNORE = [] #Schemas to ignore
 DISPLAY_COLLECTION_NAME = ""
 
 def is_special(template_id):

@@ -167,7 +167,7 @@ try:
         priv_key = keypair.to_wif()
         key = keypair.to_public()
         authorization=[account.authorization(settings.WAX_PERMISSION)]
-        memo = memo[:255]
+        memo = str(memo)[:256]
         actions = [
             EosAction(
                     account='atomictoolsx',

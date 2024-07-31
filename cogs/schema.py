@@ -61,7 +61,27 @@ async def gen_schema():
         
 
 
-    schemas_alone = list(settings.SCHEMA_NAME_MAP.items()) + [[i,i] for i in all_schemas if i not in settings.SCHEMA_NAME_MAP and i not in settings.SCHEMAS_GROUPED]
+
+
+    for i in settings.SCHEMAS_GROUPED:
+        display_name = i
+        filter_list = []
+        for j in settings.SCHEMAS_GROUPED[i]:
+            group_name = j
+            display = settings.SCHEMAS_GROUPED[i][j] 
+            cur_filter = {
+                "name": display,
+                "data": {},
+                "group": group_name,
+                "custom": []
+            }
+            filter_list.append(cur_filter)
+
+        schema_data = {"name":display_name,
+            "filters":filter_list}
+        schemas.append(schema_data)
+
+    schemas_alone = list(settings.SCHEMA_NAME_MAP.items()) + [[i,i] for i in all_schemas if i not in settings.SCHEMA_NAME_MAP and i not in settings.SCHEMA_IGNORE]
     for i in schemas_alone:
         print(i)
         actual_name = i[0]
@@ -77,25 +97,6 @@ async def gen_schema():
 
 
 
-    for i in settings.SCHEMAS_GROUPED:
-        display_name = i
-        filter_list = []
-        for j in settings.SCHEMAS_GROUPED[i]:
-            group_name = j[0]
-            display = j[1] 
-            cur_filter = {
-                "name": display,
-                "data": {},
-                "group": group_name,
-                "custom": []
-            }
-            filter_list.append(cur_filter)
-
-        schema_data = {"name":display_name,
-            "filters":filter_list}
-        schemas.append(schema_data)
-
-
     final = {"name": settings.DISPLAY_COLLECTION_NAME, "data":templates, "series":schemas}
     with open(f"{settings.COLLECTION_NAME}_schema.json", "w") as outfile:
         json.dump(final,outfile)
@@ -106,9 +107,9 @@ class Schema(commands.Cog):
     def __init__(self, bot):
         self.bot = bot  
         print("Schema cog loaded")
-		
+        
     @commands.command(description="Get AH Collection Book",
-                      aliases=["collectionbook"])
+                    aliases=["collectionbook"])
     @commands.has_any_role(*settings.DROP_ROLES)
     async def schema(self, ctx):
         try:
@@ -120,4 +121,4 @@ class Schema(commands.Cog):
             await ctx.send(f"Ran into an error {e} please ping Majic\n")
 
 async def setup(bot):
-	await bot.add_cog(Schema(bot))
+    await bot.add_cog(Schema(bot))

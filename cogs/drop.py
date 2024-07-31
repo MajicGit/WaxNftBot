@@ -41,7 +41,7 @@ class Drop(commands.Cog):
             user_message = settings.link_to_message(claimlink)
             await member.send(user_message)
             await ctx.message.add_reaction(settings.react_emoji_sequence[1])    
-            log_message = f"User {member.name} received claimlink {claimlink.split('?key')[0]} from {ctx.author.name}. Reason: {memo}"[0:969]
+            log_message = f"User {member.name} received claimlink <{claimlink.split('?key')[0]}> from {ctx.author.name}. Reason: {memo}"[0:969]
             channel = self.bot.get_channel(settings.LOG_CHANNEL)
             await channel.send(log_message)
             await ctx.message.add_reaction(settings.react_emoji_sequence[2])    
