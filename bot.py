@@ -13,21 +13,14 @@ intents.dm_messages = True
 intents.message_content = True
 
 bot = commands.Bot(command_prefix=settings.BOT_PREFIX, description=settings.BOT_DESCRIPTION, intents = intents)
-
+bot.linked_wallets = {}
 
 
 @bot.event
 async def on_ready():
-	for cog in ['cogs.drop', 'cogs.schema', 'cogs.chatloot']:
+	for cog in ['cogs.drop', 'cogs.schema', 'cogs.chatloot', 'cogs.util']:
 		await bot.load_extension(cog)
 	print(f'We have logged in as {bot.user}')
-
-
-@bot.command(name='hi')
-@commands.is_owner()
-async def hi(ctx):
-	print("Hi command")
-	await ctx.send("Hello there")
 
 @bot.command()
 @commands.is_owner()

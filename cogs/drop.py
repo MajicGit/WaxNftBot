@@ -31,7 +31,23 @@ class Drop(commands.Cog):
                 await ctx.send(f"Error sending claimlink: No assets in wallet {settings.WAX_ACC_NAME} found.")
                 return
             to_send = secrets.choice(available_assets)['asset_id']
-            
+
+            try:
+                if str(member.id) in self.bot.linked_wallets:
+                    target = self.bot.linked_wallets[str(member.id)]
+                    tx_id = await utils.send_asset([to_send], target, memo = memo + settings.DROP_EXTRA_INFO)        
+                    log_message = f"User {member.name} received asset {to_send} from {ctx.author.name} directly to their wallet {target}. Reason: {memo}"[0:969]
+                    channel = self.bot.get_channel(settings.LOG_CHANNEL)
+                    await channel.send(log_message)
+                    await ctx.message.add_reaction(settings.react_emoji_sequence[1])    
+
+                    user_message = settings.transfer_to_message(to_send, tx_id)
+                    await member.send(user_message)
+                    await ctx.message.add_reaction(settings.react_emoji_sequence[2])    
+                    return 
+            except Exception as e:
+                await ctx.send(f"Ran into an error directly sending the NFT to linked wallet: {e}\n")
+                return
             claimlink = await utils.gen_claimlink([to_send], memo = memo + settings.DROP_EXTRA_INFO) 
             print(claimlink)
 
