@@ -74,25 +74,25 @@ class Chatloot(commands.Cog):
                 await message.channel.send(f"Error sending claimlink: No assets in wallet {settings.WAX_ACC_NAME} found.")
                 return
 
-            to_send = secrets.choice(available_assets)['asset_id']
+            choosen_asset = secrets.choice(available_assets)
+            to_send = choosen_asset['asset_id']
+
             memo = "Congratulations! You've been randomly chosen to receive an NFT!"
 
 
-            try:
-                if str(userid) in self.bot.linked_wallets:
-                    target = self.bot.linked_wallets[str(userid)]
-                    tx_id = await utils.send_asset([to_send], target, memo = memo + settings.DROP_EXTRA_INFO)        
-                    log_message = f"User {message.author.name} received asset {to_send} from random chat activity directly to their wallet."
-                    
-                    channel = self.bot.get_channel(settings.LOG_CHANNEL)
-                    await channel.send(log_message)
-                    await ctx.message.add_reaction(settings.react_emoji_sequence[1])    
+            if str(userid) in self.bot.linked_wallets:
+                target = self.bot.linked_wallets[str(userid)]
+                tx_id = await utils.send_asset([to_send], target, memo = memo + settings.DROP_EXTRA_INFO)        
+                log_message = f"User {message.author.name} received asset {to_send} from random chat activity directly to their wallet."
+                
+                channel = self.bot.get_channel(settings.LOG_CHANNEL)
+                await channel.send(log_message)
+                await ctx.message.add_reaction(settings.react_emoji_sequence[1])    
 
-                    user_message = settings.transfer_to_message(to_send, tx_id)
-                    await member.send(user_message)
-                    await ctx.message.add_reaction(settings.react_emoji_sequence[2])    
-                    return 
-
+                user_message = settings.transfer_to_message(choosen_asset, tx_id)
+                await member.send(user_message)
+                await ctx.message.add_reaction(settings.react_emoji_sequence[2])    
+                return 
             claimlink = await utils.gen_claimlink([to_send], memo = memo + settings.DROP_EXTRA_INFO) 
             print(claimlink)
 

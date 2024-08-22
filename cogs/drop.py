@@ -30,7 +30,8 @@ class Drop(commands.Cog):
             if len(available_assets) == 0:
                 await ctx.send(f"Error sending claimlink: No assets in wallet {settings.WAX_ACC_NAME} found.")
                 return
-            to_send = secrets.choice(available_assets)['asset_id']
+            choosen_asset = secrets.choice(available_assets)
+            to_send = choosen_asset['asset_id']
 
             try:
                 if str(member.id) in self.bot.linked_wallets:
@@ -41,7 +42,7 @@ class Drop(commands.Cog):
                     await channel.send(log_message)
                     await ctx.message.add_reaction(settings.react_emoji_sequence[1])    
 
-                    user_message = settings.transfer_to_message(to_send, tx_id)
+                    user_message = settings.transfer_to_message(choosen_asset, tx_id)
                     await member.send(user_message)
                     await ctx.message.add_reaction(settings.react_emoji_sequence[2])    
                     return 
