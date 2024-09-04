@@ -20,7 +20,11 @@ def link_to_message(claimlink):
 
 
 def transfer_to_message(asset, tx_id):
-    return f"""Congratulations, the Pink Fairy sent a [random NFT](https://atomichub-ipfs.com/ipfs/{asset['data']['img']}) directly to your wallet!\nYou can view your NFT on [AtomicHub](<https://wax.atomichub.io/explorer/asset/wax-mainnet/{asset['asset_id']}>)\nIf you feel insecure, ask a Bouncer or Bodyguard in our main chat.\nThere is more information about my home collection at <https://waxwaifus.carrd.com/>.\nEnjoy your gift and always feel free to ask any questions, please!""" 
+    try:
+        ipf_link = f"https://atomichub-ipfs.com/ipfs/{asset['data']['img']}"
+    except:
+        ipf_link = f"https://atomichub-ipfs.com/ipfs/{asset['data']['video']}"
+    return f"""Congratulations, the Pink Fairy sent a [random NFT]({ipf_link}) directly to your wallet!\nYou can view your NFT on [AtomicHub](<https://wax.atomichub.io/explorer/asset/wax-mainnet/{asset['asset_id']}>)\nIf you feel insecure, ask a Bouncer or Bodyguard in our main chat.\nThere is more information about my home collection at <https://waxwaifus.carrd.com/>.\nEnjoy your gift and always feel free to ask any questions, please!""" 
 
 GUILD = 0 #Guild ID for chatloot
 CHATLOOT_PROBABILITY = 1000 #One in how many messages on average will receive a random drop

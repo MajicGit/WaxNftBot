@@ -82,7 +82,7 @@ class Chatloot(commands.Cog):
 
             if str(userid) in self.bot.linked_wallets:
                 target = self.bot.linked_wallets[str(userid)]
-                tx_id = await utils.send_asset([to_send], target, memo = memo + settings.DROP_EXTRA_INFO)        
+                tx_id = await utils.send_asset([to_send], target, memo = memo)        
                 log_message = f"User {message.author.name} received asset {to_send} from random chat activity directly to their wallet."
                 
                 channel = self.bot.get_channel(settings.LOG_CHANNEL)

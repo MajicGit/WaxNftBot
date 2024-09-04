@@ -36,7 +36,7 @@ class Drop(commands.Cog):
             try:
                 if str(member.id) in self.bot.linked_wallets:
                     target = self.bot.linked_wallets[str(member.id)]
-                    tx_id = await utils.send_asset([to_send], target, memo = memo + settings.DROP_EXTRA_INFO)        
+                    tx_id = await utils.send_asset([to_send], target, memo = memo)        
                     log_message = f"User {member.name} received asset {to_send} from {ctx.author.name} directly to their wallet {target}. Reason: {memo}"[0:969]
                     channel = self.bot.get_channel(settings.LOG_CHANNEL)
                     await channel.send(log_message)
