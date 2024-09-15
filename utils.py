@@ -153,28 +153,25 @@ async def try_api_request(request: str, endpoints=query_normal_api_list, post_bo
         await asyncio.sleep(2.5 * backoff_factor)
 
 try:
-    from aioeosabi.contracts import eosio_token
-    from aioeosabi.exceptions import EosAssertMessageException, EosRpcException
     from aioeosabi.rpc import ERROR_NAME_MAP
-    from aioeosabi import EosTransaction, EosKey, EosJsonRpc, EosAction, serializer, EosAccount
+    from aioeosabi import EosTransaction, EosKey, EosJsonRpc, EosAction, EosAccount
     import settings 
 
     normal_api_list = ["https://wax.pink.gg", "https://wax.eu.eosamsterdam.net", 'https://api.wax.liquidstudios.io', 'https://api.wax.bountyblok.io']
     api_rpc = [EosJsonRpc(url=addr) for addr in normal_api_list]
     account = EosAccount(settings.WAX_ACC_NAME, private_key= settings.WAX_ACC_PRIVKEY)
 
-    async def send_asset(asset_id: List[int], receiver: str, account: EosAccount = account, memo=""):
-        keypair = EosKey()
-        priv_key = keypair.to_wif()
-        key = keypair.to_public()
-        authorization=[account.authorization(settings.WAX_PERMISSION)]
+    async def send_asset(asset_id: List[int], receiver: str, account: EosAccount = account, memo = "", sender = "", additional_auths = []):
+        authorization=[account.authorization(settings.WAX_PERMISSION)] + additional_auths
         memo = str(memo)[:256]
+        if sender == "":
+            sender = account.name
         actions = [
             EosAction(
                     account='atomicassets',
                     name='transfer',
                     authorization=authorization,
-                    data={"from": account.name, "to": receiver, "asset_ids": asset_id, "memo": memo},
+                    data={"from": sender, "to": receiver, "asset_ids": asset_id, "memo": memo},
                 )
             ]
         resp, msg = await doAction(actions, api_rpc, account)
@@ -183,19 +180,21 @@ try:
         tx_id = msg["transaction_id"]
         return tx_id
 
-    async def gen_claimlink(asset_id: List[int], account: EosAccount = account, memo=""):
+    async def gen_claimlink(asset_id: List[int], account: EosAccount = account, memo = "", sender = "", additional_auths = []):
         keypair = EosKey()
         priv_key = keypair.to_wif()
         key = keypair.to_public()
-        authorization=[account.authorization(settings.WAX_PERMISSION)]
+        authorization=[account.authorization(settings.WAX_PERMISSION)] + additional_auths
         memo = str(memo)[:256]
+        if sender == "":
+            sender = account.name
         actions = [
             EosAction(
                     account='atomictoolsx',
                     name='announcelink',
                     authorization=authorization,
                     data={
-                        'creator': account.name,
+                        'creator': sender,
                         'key': key,
                         'asset_ids': asset_id,
                         'memo': memo
@@ -205,7 +204,7 @@ try:
                     account='atomicassets',
                     name='transfer',
                     authorization=authorization,
-                    data={"from": account.name, "to": "atomictoolsx", "asset_ids": asset_id, "memo": "link"},
+                    data={"from": sender, "to": "atomictoolsx", "asset_ids": asset_id, "memo": "link"},
                 )
             ]
         resp, msg = await doAction(actions, api_rpc, account)
