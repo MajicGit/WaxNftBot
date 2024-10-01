@@ -22,6 +22,8 @@ class TrickOrTreat(commands.Cog):
     @commands.check(lambda ctx: ctx.guild and ctx.guild.id == settings.GUILD)  # 
     @commands.has_any_role(1140028262207201280) #Verified role
     async def trickortreat(self, ctx):
+        if ctx.channel.id != 1290748756127645767:
+            return
         special_wallet = EosAccount("waifustreats", private_key= settings.WAX_ACC_PRIVKEY)
 
         userid = ctx.author.id
