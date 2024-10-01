@@ -161,7 +161,64 @@ try:
     api_rpc = [EosJsonRpc(url=addr) for addr in normal_api_list]
     account = EosAccount(settings.WAX_ACC_NAME, private_key= settings.WAX_ACC_PRIVKEY)
 
-    async def send_asset(asset_id: List[int], receiver: str, account: EosAccount = account, memo = "", sender = "", additional_auths = []):
+
+    async def drop_random_from_wallet(bot, drop_message, member, memo: str, log_additional, emoji_sequences = List[str], account = account, sender = "", additional_auths = []):
+        """Picks a random NFT from a wallet and sends that to a user"""
+        if sender == "":
+            sender = account.name
+
+        available_assets = (await try_api_request(f"/atomicassets/v1/assets?owner={sender}&page=1&limit=1000",endpoints=aa_api_list))['data']
+        if len(available_assets) == 0:
+            await drop_message.channel.send(f"Error sending NFT: No assets in wallet {sender} found.")
+            return
+        
+        choosen_asset = secrets.choice(available_assets)
+        to_send = choosen_asset['asset_id']
+        try:
+            if str(member.id) in bot.linked_wallets:
+                await directly_send_nft(bot = bot, drop_message = drop_message, member = member, assets = [to_send], dropped_asset = choosen_asset, memo =  memo, log_additional =  log_additional, emoji_sequences = emoji_sequences, account = account, sender = sender, additional_auths = additional_auths)
+                return 
+            
+        except Exception as e:
+            await drop_message.channel.send(f"Ran into an error directly sending the NFT to linked wallet: {e}\n")
+            return
+        await send_claimlink_nft(bot = bot, drop_message = drop_message, member = member, assets = [to_send], memo =  memo, log_additional =log_additional, emoji_sequences = emoji_sequences, account = account, sender = sender, additional_auths = additional_auths)
+
+
+
+    async def directly_send_nft(bot, drop_message, member, assets: List[int], dropped_asset, memo: str, log_additional, emoji_sequences = List[str], account = account, sender = "", additional_auths = [], ):
+        """Directly send a NFT to a members linked discord wallet. Assumes they have a linked wallet"""
+        target = bot.linked_wallets[str(member.id)]
+        tx_id = await send_asset(asset_ids = assets, receiver = target, memo = memo, account = account, sender = sender, additional_auths = additional_auths)     
+        await drop_message.add_reaction(emoji_sequences[0])   
+        channel = bot.get_channel(settings.LOG_CHANNEL) 
+        log_message = (f"User {member.name} received asset {' '.join(assets)} directly to their wallet {target}." + log_additional)[0:969]
+        await channel.send(log_message) 
+        user_message = settings.transfer_to_message(dropped_asset, tx_id)
+        await member.send(user_message)
+        await drop_message.add_reaction(emoji_sequences[1])
+    
+
+    async def send_claimlink_nft(bot, drop_message, member, assets: List[int], memo: str, log_additional, emoji_sequences = List[str], account = account, sender = "", additional_auths = []):
+        """Created and DMs a user a claimlink with the specified assets"""
+        claimlink = await gen_claimlink(assets, memo = memo + settings.DROP_EXTRA_INFO, account = account, sender = sender, additional_auths = additional_auths)
+        print(claimlink)
+
+        if "https://wax.atomichub.io/trading/link/" not in claimlink:
+            await drop_message.channel.send(f"Link generation failed! {claimlink}. Please try again and/or ping Majic")
+            return
+        
+        await drop_message.add_reaction(emoji_sequences[0])  
+        user_message = settings.link_to_message(claimlink)
+        await member.send(user_message)
+
+        channel = bot.get_channel(settings.LOG_CHANNEL)
+        log_message = (f"User {member.name} received claimlink <{claimlink.split('?key')[0]}>" + log_additional)[0:969] 
+        await channel.send(log_message) 
+        await drop_message.add_reaction(emoji_sequences[1])
+        
+
+    async def send_asset(asset_ids: List[int], receiver: str, account: EosAccount = account, memo = "", sender = "", additional_auths = []):
         authorization=[account.authorization(settings.WAX_PERMISSION)] + additional_auths
         memo = str(memo)[:256]
         if sender == "":
@@ -171,7 +228,7 @@ try:
                     account='atomicassets',
                     name='transfer',
                     authorization=authorization,
-                    data={"from": sender, "to": receiver, "asset_ids": asset_id, "memo": memo},
+                    data={"from": sender, "to": receiver, "asset_ids": asset_ids, "memo": memo},
                 )
             ]
         resp, msg = await doAction(actions, api_rpc, account)
@@ -180,7 +237,7 @@ try:
         tx_id = msg["transaction_id"]
         return tx_id
 
-    async def gen_claimlink(asset_id: List[int], account: EosAccount = account, memo = "", sender = "", additional_auths = []):
+    async def gen_claimlink(asset_ids: List[int], account: EosAccount = account, memo = "", sender = "", additional_auths = []):
         keypair = EosKey()
         priv_key = keypair.to_wif()
         key = keypair.to_public()
@@ -196,7 +253,7 @@ try:
                     data={
                         'creator': sender,
                         'key': key,
-                        'asset_ids': asset_id,
+                        'asset_ids': asset_ids,
                         'memo': memo
                     }
                 ),
@@ -204,7 +261,7 @@ try:
                     account='atomicassets',
                     name='transfer',
                     authorization=authorization,
-                    data={"from": sender, "to": "atomictoolsx", "asset_ids": asset_id, "memo": "link"},
+                    data={"from": sender, "to": "atomictoolsx", "asset_ids": asset_ids, "memo": "link"},
                 )
             ]
         resp, msg = await doAction(actions, api_rpc, account)
