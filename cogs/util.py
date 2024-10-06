@@ -68,7 +68,7 @@ class Util(commands.Cog):
             self.bot.linked_wallets[str(ctx.author.id)] = address
             with open("walletlinks.json","w") as f:
                 json.dump(self.bot.linked_wallets, f) 
-            log_message = f"User {ctx.author.name} {ctx.author.id} linked to wallet [{address}](<https://wax.bloks.io/account/{address}>)"
+            log_message = f"User {ctx.author.name} <@{ctx.author.id}> linked to wallet [{address}](<https://wax.bloks.io/account/{address}>)"
             channel = self.bot.get_channel(settings.LOG_CHANNEL)
             await channel.send(log_message)
             await ctx.message.add_reaction("✅")

@@ -18,7 +18,7 @@ class TrickOrTreat(commands.Cog):
 
 
     @commands.command(description="Test your luck, you may just win a NFT.",
-                      aliases=["santa"])
+                      aliases=["santa", "trick"])
     @commands.check(lambda ctx: ctx.guild and ctx.guild.id == settings.GUILD)  # 
     @commands.has_any_role(1140028262207201280) #Verified role
     async def trickortreat(self, ctx):
@@ -53,18 +53,20 @@ class TrickOrTreat(commands.Cog):
                 timeout = self.last_timeouts[userid] ** 2 // 60
             await ctx.message.add_reaction("🥚")
             await ctx.channel.send("Trick! You didn't get lucky today!")
-            await ctx.author.timeout(discord.utils.utcnow() + datetime.timedelta(seconds = timeout_duration + timeout), reason="Trick! You didn't get lucky today")
-            self.last_timeouts[userid] = timeout_duration
+            try:
+                await ctx.author.timeout(discord.utils.utcnow() + datetime.timedelta(seconds = timeout_duration + timeout), reason="Trick! You didn't get lucky today")
+                self.last_timeouts[userid] = timeout_duration
+            except Exception as e:
+                print("Failed to timeout user", e)
             return 
         try:
             self.last_timeouts[userid] = 0
-
-            
             log_additional = f" Trick or Treat drop from daily command."
-            await utils.drop_random_from_wallet(bot = self.bot, drop_message = ctx.message, member = ctx.author, memo =  "Bonus Treat! You've won a random Waifu NFT", log_additional =  log_additional, emoji_sequences = ["👻", "🍬"], account = special_wallet)
+            await utils.drop_random_from_wallet(bot = self.bot, drop_message = ctx.message, member = ctx.author, memo =  "Treat! You've won some candy", log_additional =  log_additional, emoji_sequences = ["👻", "🍬"], account = special_wallet)
 
         except Exception as e:
             await ctx.send(f"Ran into an error. Please ping Majic!: {e}\n")
+            self.used_treat[userid] = ""
 
 
 async def setup(bot):
