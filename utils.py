@@ -192,7 +192,7 @@ try:
         tx_id = await send_asset(asset_ids = assets, receiver = target, memo = memo, account = account, sender = sender, additional_auths = additional_auths)     
         await drop_message.add_reaction(emoji_sequences[0])   
         channel = bot.get_channel(settings.LOG_CHANNEL) 
-        log_message = (f"User {member.name} received asset https://wax.atomichub.io/explorer/asset/wax-mainnet/{' '.join(assets)} directly to their wallet https://wax.bloks.io/account/{target}." + log_additional)[0:969]
+        log_message = (f"User {member.name} received asset <https://wax.atomichub.io/explorer/asset/wax-mainnet/{' '.join(assets)}> directly to their wallet <https://wax.bloks.io/account/{target}>." + log_additional)[0:969]
         await channel.send(log_message) 
         user_message = settings.transfer_to_message(dropped_asset, tx_id)
         await member.send(user_message)
