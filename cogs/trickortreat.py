@@ -27,11 +27,16 @@ class TrickOrTreat(commands.Cog):
         special_wallet = EosAccount("waifustreats", private_key= settings.WAX_ACC_PRIVKEY)
 
         userid = ctx.author.id
+        import datetime 
+        current_time = int(datetime.datetime.timestamp(datetime.datetime.now()))
         if userid in self.used_treat and self.used_treat[userid] == date.today().strftime("%d-%m"):
+        #if userid in self.used_treat and current_time - self.used_treat[userid] < 60 * 60 * 4 :
             await ctx.message.add_reaction("🕐")  
             await ctx.channel.send("You've already tried your luck today! Come back tomorrow")
+            # await ctx.channel.send("You've already tried your luck in the past four hours! Come back later")
             return
         self.used_treat[userid] = date.today().strftime("%d-%m")
+        # self.used_treat[userid] = current_time
         await ctx.message.add_reaction("🏡") 
 
         randomness = secrets.randbelow(100)

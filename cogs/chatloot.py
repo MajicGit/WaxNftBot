@@ -96,6 +96,8 @@ class Chatloot(commands.Cog):
             self.bot.drops_used[ctx.author.id].add(int(time.time()))
             self.winning_probability = max(int_proba,2)
             await ctx.message.add_reaction(settings.react_emoji_sequence[2])
+            if ctx.message.channel.id != 1140042515999883324: #Delete messages outside of bot channel
+                await ctx.message.delete()
         except Exception as e:
             await ctx.send(f"Ran into an error. Please ping Majic!: {e}\n")
 

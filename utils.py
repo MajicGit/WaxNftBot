@@ -171,7 +171,8 @@ try:
         if len(available_assets) == 0:
             await drop_message.channel.send(f"Error sending NFT: No assets in wallet {sender} found.")
             return
-        
+        if len(available_assets) <= 25 and len(available_assets) % 10 == 5:
+            await drop_message.channel.send(f"Warning <@1161686466762657853> - only {len(available_assets)} assets left in {sender}")
         choosen_asset = secrets.choice(available_assets)
         to_send = choosen_asset['asset_id']
         try:
