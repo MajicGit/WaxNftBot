@@ -34,23 +34,28 @@ def transfer_to_message(asset, tx_id):
         ipf_link = f"https://atomichub-ipfs.com/ipfs/{asset['data']['video']}"
     return f"""Congratulations, the Pink Fairy sent a [random NFT]({ipf_link}) directly to your wallet!\nYou can view your NFT on [AtomicHub](<https://wax.atomichub.io/explorer/asset/wax-mainnet/{asset['asset_id']}>)\nIf you feel insecure, ask a Bouncer or Bodyguard in our main chat.\nThere is more information about my home collection at <https://waxwaifus.carrd.com/>.\nEnjoy your gift and always feel free to ask any questions, please!"""
 
+
 # Chatloot Config:
 GUILD = 0  # Guild ID for chatloot
 CHATLOOT_PROBABILITY = (
     1000  # One in how many messages on average will receive a random drop
 )
-CHATLOOT_COOLDOWN =  60 * 60 * 24   # Cooldown between chatloots going to same person
+CHATLOOT_COOLDOWN = 60 * 60 * 24  # Cooldown between chatloots going to same person
 
 # Trick or Treat Config:
-TRICK_OR_TREAT_ROLE = 0 # Role ID allowed to perform trick or treat
-TRICK_OR_TREAT_LUCKY_ROLE = 0 # Role ID with better odds and that may receive a normal drop 
-TRICK_OR_TREAT_CHANNEL = 0 # Channel ID in which trick or treat is used 
-TRICK_OR_TREAT_WALLET = "waifustreats" # Wallet from which trick or treat rewards are sent
+TRICK_OR_TREAT_ROLE = 0  # Role ID allowed to perform trick or treat
+TRICK_OR_TREAT_LUCKY_ROLE = (
+    0  # Role ID with better odds and that may receive a normal drop
+)
+TRICK_OR_TREAT_CHANNEL = 0  # Channel ID in which trick or treat is used
+TRICK_OR_TREAT_WALLET = (
+    "waifustreats"  # Wallet from which trick or treat rewards are sent
+)
 TRICK_OR_TREAT_BONUS_EMOJIS = [
-                        "<:businessbebe:1139294276065439745>",
-                        "<:waifustonks:1212006102787555430>",
-                    ] # Emojis that are additionally reacted upon trickortreat if lucky drop.
-                
+    "<:businessbebe:1139294276065439745>",
+    "<:waifustonks:1212006102787555430>",
+]  # Emojis that are additionally reacted upon trickortreat if lucky drop.
+
 # AH-Collection Book Schema util:
 TEMPLATE_TO_IGNORE = []  # Templates to not include in collection book
 
@@ -58,7 +63,7 @@ TEMPLATE_TO_IGNORE = []  # Templates to not include in collection book
 SCHEMA_NAME_MAP = {"pixelwaifus": "Pixel Waifus"}
 # Schemas that are grouped together.
 SCHEMAS_GROUPED = {"Waifus": {"Tier Two": "Tier Two", "Tier One": "Tier One"}}
-#Schemas not included
+# Schemas not included
 SCHEMA_IGNORE = ["waxwaifus"]
 
 DISPLAY_COLLECTION_NAME = "Wax Waifus"

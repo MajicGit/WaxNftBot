@@ -6,3 +6,4 @@ settings.py
 *.pyc
 settings_skunky.py
 settings_goofballs.py
+walletlinks.json

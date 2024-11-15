@@ -1,7 +1,7 @@
 # Wax NFT Tipbot
 Wax NFT Tipbot written in python.
 
-Features:
+## Features:
 - Random drops for people active in chat (chatloot)
 - Two drop commands to send drops to users from different wallets
     - Supports both sending claimlinks and users registering their wallet and receiving the drops directly.
@@ -11,3 +11,16 @@ Features:
 - utils library for interacting with wax blockchain
 
 Documentation still WIP
+
+
+## Setup 
+- Requires python3 > 3.8
+- Copy `example_settings.py` to `settings.py` and fill out
+```
+pip3 install -r requirements.txt
+```
+```
+python3 bot.py
+```
+
+This Project was inspired by the [Green Wizard](https://github.com/crptomonkeys/greenwiz/tree/master) developed by Vyryn for cryptomonKeys.

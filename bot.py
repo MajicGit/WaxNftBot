@@ -26,7 +26,7 @@ async def on_ready():
         "cogs.collectionbook",
         "cogs.chatloot",
         "cogs.util",
-        "cogs.trickortreat",
+#        "cogs.trickortreat",
     ]:
         await bot.load_extension(cog)
     print(f"We have logged in as {bot.user}")
