@@ -23,7 +23,7 @@ bot.linked_wallets = {}
 async def on_ready():
     for cog in [
         "cogs.drop",
-        "cogs.schema",
+        "cogs.collectionbook",
         "cogs.chatloot",
         "cogs.util",
         "cogs.trickortreat",

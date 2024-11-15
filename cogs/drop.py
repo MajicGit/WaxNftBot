@@ -61,7 +61,7 @@ class Drop(commands.Cog):
     async def stab(
         self, ctx, member: discord.Member, *, memo: str = settings.DEFAULT_DROP_MEMO
     ):
-
+        # This command uses the standard wallets drop perm to authorize the drop from the stab wallet. May require some tweaking
         special_wallet = settings.WAX_STAB_ACC_NAME
         special_auth = [EosAccount(special_wallet).authorization("active")]
         try:
