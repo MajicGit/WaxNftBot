@@ -1,23 +1,34 @@
 from discord.ext import commands
-import utils 
+import utils
 import settings
 import secrets
-import json 
+import json
 import re
 
+
 class Util(commands.Cog):
+    """
+    Utility cog:
+    randomactive command to get random active members of chat
+    setwallet, getwallet and clearwallet commands to let users manage their connected wallet.
+    """
+
     def __init__(self, bot):
         self.bot = bot
         try:
-            with open("walletlinks.json","r") as f:
+            # I know this isn't a great solution, but kinda works well enough :)
+            with open("walletlinks.json", "r") as f:
                 bot.linked_wallets = json.load(f)
         except Exception as e:
             print(f"Encountered error {e} when loading linked wallets")
         print("Util cog loaded")
-		
-    @commands.command(description="Fetches a random active from chat.",
-                      aliases=["random-active","whoisa"])
-    async def randomactive(self, ctx, *,num_messages: int = 91):
+
+    @commands.command(
+        description="Fetches a random active from chat.",
+        aliases=["random-active", "whoisa"],
+    )
+    @commands.has_any_role(*settings.DROP_ROLES)
+    async def randomactive(self, ctx, *, num_messages: int = 91):
         try:
             if num_messages <= 0:
                 await ctx.send("Can't fetch negative number of messages.")
@@ -28,7 +39,7 @@ class Util(commands.Cog):
             senders = {}
             seen = -1
             async for message in ctx.channel.history(limit=num_messages + 1):
-                #+1 due to deferred response
+                # +1 due to deferred response
                 seen += 1
                 if message.author.bot:
                     continue
@@ -40,68 +51,95 @@ class Util(commands.Cog):
 
             entries = []
             for user in senders:
-                count = 1 + (senders[user]-1) // 10
+                count = 1 + (senders[user] - 1) // 10
                 for _ in range(count):
                     entries.append(user)
-            
+
             if len(entries) == 0:
                 await ctx.send("No valid messages found.")
-                return 
+                return
             if len(senders) == 1:
-                await ctx.send(f"Only a single active user in the last {seen} messages.")
-                return 
+                await ctx.send(
+                    f"Only a single active user in the last {seen} messages."
+                )
+                return
             winner = entries[secrets.randbelow(len(entries))]
             await ctx.send(f"Random active in the last {seen} messages: <@{winner}>")
         except Exception as e:
-            await ctx.send(f"Ran into an error {e}. If this persists please ping Majic")
+            await ctx.send(
+                f"Ran into an error {e}. If this persists please ping {settings.MAINTAINER}"
+            )
 
-
-    @commands.command(description="Register your wallets to receive your NFTs directly.",
-                      aliases=["set-wallet", "walletlink" ,"link", "link-wallet", "register"])
+    @commands.command(
+        description="Register your wallets to receive your NFTs directly.",
+        aliases=["set-wallet", "walletlink", "link", "link-wallet", "register"],
+    )
     async def setwallet(self, ctx, *, address: str):
         try:
-            await ctx.message.add_reaction("👀")    
-            regex = r'(^[a-z1-5.]{0,11}[a-z1-5]$)|(^[a-z1-5.]{12}[a-j1-5]$)'
+            await ctx.message.add_reaction("👀")
+            regex = r"(^[a-z1-5.]{0,11}[a-z1-5]$)|(^[a-z1-5.]{12}[a-j1-5]$)"
             if not re.match(regex, address):
-                await ctx.send("Wax wallet appears to be invalid. Please double check and ping Majic.")
+                await ctx.send(
+                    "Wax wallet appears to be invalid. Please double check and ping {settings.MAINTAINER}."
+                )
                 return
             self.bot.linked_wallets[str(ctx.author.id)] = address
-            with open("walletlinks.json","w") as f:
-                json.dump(self.bot.linked_wallets, f) 
+            with open("walletlinks.json", "w") as f:
+                json.dump(self.bot.linked_wallets, f)
             log_message = f"User {ctx.author.name} <@{ctx.author.id}> linked to wallet [{address}](<https://wax.bloks.io/account/{address}>)"
             channel = self.bot.get_channel(settings.LOG_CHANNEL)
             await channel.send(log_message)
             await ctx.message.add_reaction("✅")
         except Exception as e:
-            await ctx.send(f"Ran into an error {e}. If this persists please ping Majic")
+            await ctx.send(
+                f"Ran into an error {e}. If this persists please ping {settings.MAINTAINER}"
+            )
 
-    @commands.command(description="Get your registered wallet.",
-                      aliases=["get-wallet", "getlink", "wallet"])
+    @commands.command(
+        description="Get your registered wallet.",
+        aliases=["get-wallet", "getlink", "wallet"],
+    )
     async def getwallet(self, ctx):
         try:
             if str(ctx.author.id) in self.bot.linked_wallets:
-                await ctx.send(f"Your currently linked wallet is {self.bot.linked_wallets[str(ctx.author.id)]}. You can use `,setwallet` to change this or `,clearwallet` to receive claimlinks instead.")
+                await ctx.send(
+                    f"Your currently linked wallet is {self.bot.linked_wallets[str(ctx.author.id)]}. You can use `,setwallet` to change this or `,clearwallet` to receive claimlinks instead."
+                )
             else:
-                await ctx.send("You currently do not have any wallet linked. You can use `,setwallet` to set a wallet")
+                await ctx.send(
+                    "You currently do not have any wallet linked. You can use `,setwallet` to set a wallet"
+                )
         except Exception as e:
-            await ctx.send(f"Ran into an error {e}. If this persists please ping Majic")
+            await ctx.send(
+                f"Ran into an error {e}. If this persists please ping {settings.MAINTAINER}"
+            )
 
-
-    @commands.command(description="Clear your registered wallet.",
-                      aliases=["clear-wallet", "unlink" ,"unregister"])
+    @commands.command(
+        description="Clear your registered wallet.",
+        aliases=["clear-wallet", "unlink", "unregister"],
+    )
     async def clearwallet(self, ctx):
         try:
             if str(ctx.author.id) in self.bot.linked_wallets:
-                log_message = f"User {ctx.author.name} {ctx.author.id} cleared their wallet"
+                log_message = (
+                    f"User {ctx.author.name} {ctx.author.id} cleared their wallet"
+                )
                 self.bot.linked_wallets.pop(str(ctx.author.id))
                 channel = self.bot.get_channel(settings.LOG_CHANNEL)
-                with open("walletlinks.json","w") as f:
-                    json.dump(self.bot.linked_wallets, f) 
-                await ctx.send(f"Succesfully cleared your wallet. To set a new wallet, you can use `,setwallet`.")
+                with open("walletlinks.json", "w") as f:
+                    json.dump(self.bot.linked_wallets, f)
+                await ctx.send(
+                    f"Succesfully cleared your wallet. To set a new wallet, you can use `,setwallet`."
+                )
             else:
-                await ctx.send("You currently do not have any wallet linked. You can use `,setwallet` to set a wallet")
+                await ctx.send(
+                    "You currently do not have any wallet linked. You can use `,setwallet` to set a wallet"
+                )
         except Exception as e:
-            await ctx.send(f"Ran into an error {e}. If this persists please ping Majic")
+            await ctx.send(
+                f"Ran into an error {e}. If this persists please ping {settings.MAINTAINER}"
+            )
+
 
 async def setup(bot):
-	await bot.add_cog(Util(bot))
+    await bot.add_cog(Util(bot))
