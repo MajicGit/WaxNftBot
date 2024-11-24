@@ -43,10 +43,8 @@ CHATLOOT_PROBABILITY = (
 CHATLOOT_COOLDOWN = 60 * 60 * 24  # Cooldown between chatloots going to same person
 
 # Trick or Treat Config:
-TRICK_OR_TREAT_ROLE = 0  # Role ID allowed to perform trick or treat
-TRICK_OR_TREAT_LUCKY_ROLE = (
-    0  # Role ID with better odds and that may receive a normal drop
-)
+TRICK_OR_TREAT_ROLES = []  # Role ID allowed to perform trick or treat
+TRICK_OR_TREAT_LUCKY_ROLES = [] # Role ID with better odds and that may receive a normal drop
 TRICK_OR_TREAT_CHANNEL = 0  # Channel ID in which trick or treat is used
 TRICK_OR_TREAT_WALLET = (
     "waifustreats"  # Wallet from which trick or treat rewards are sent

@@ -28,7 +28,7 @@ class TrickOrTreat(commands.Cog):
         aliases=["santa", "trick"],
     )
     @commands.check(lambda ctx: ctx.guild and ctx.guild.id == settings.GUILD)
-    @commands.has_any_role(settings.TRICK_OR_TREAT_ROLE)  # Verified role
+    @commands.has_any_role(*settings.TRICK_OR_TREAT_ROLES)  # Verified role
     async def trickortreat(self, ctx):
         if ctx.channel.id != settings.TRICK_OR_TREAT_CHANNEL:
             return
@@ -57,7 +57,7 @@ class TrickOrTreat(commands.Cog):
         randomness = secrets.randbelow(100)
 
         if (
-            settings.TRICK_OR_TREAT_LUCKY_ROLE in [role.id for role in ctx.author.roles]
+            len([role.id for role in ctx.author.roles if role.id in settings.TRICK_OR_TREAT_LUCKY_ROLES]) > 1
             and randomness < 10
         ):
             # Lucky role: 10% chance to get a normal drop
