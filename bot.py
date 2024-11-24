@@ -21,13 +21,7 @@ bot.linked_wallets = {}
 
 @bot.event
 async def on_ready():
-    for cog in [
-        "cogs.drop",
-        "cogs.collectionbook",
-        "cogs.chatloot",
-        "cogs.util",
-#        "cogs.trickortreat",
-    ]:
+    for cog in settings.cogs_to_load:
         await bot.load_extension(cog)
     print(f"We have logged in as {bot.user}")
 

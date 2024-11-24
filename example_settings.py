@@ -20,6 +20,14 @@ react_emoji_sequence = [
     "💌",
 ]  # First sent upon command, second when DM is sent, last when logging is complete
 
+cogs_to_load = [
+        "cogs.drop",
+        "cogs.collectionbook",
+        "cogs.chatloot",
+        "cogs.util",
+        "cogs.trickortreat",
+] # Cogs to load
+
 
 # Message that is sent with a claimlink
 def link_to_message(claimlink):
