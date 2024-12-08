@@ -57,10 +57,24 @@ TRICK_OR_TREAT_CHANNEL = 0  # Channel ID in which trick or treat is used
 TRICK_OR_TREAT_WALLET = (
     "waifustreats"  # Wallet from which trick or treat rewards are sent
 )
+
+TRICK_OR_TREAT_EMOJIS = [
+    "🏡",
+    "🥚"
+    "👻", 
+    "🍬"
+] #Emoji sequence for trick or treat drops - second one is in case of trick 
+TRICK_OR_TREAT_BONUS_ODDS = 10 # Chance for people with lucky role to get bonus drop 
+TRICK_OR_TREAT_TIMEOUT_ODDS = 25 #Chance for timeout from trick or treat command usage. 
 TRICK_OR_TREAT_BONUS_EMOJIS = [
     "<:businessbebe:1139294276065439745>",
     "<:waifustonks:1212006102787555430>",
 ]  # Emojis that are additionally reacted upon trickortreat if lucky drop.
+TRICK_OR_TREAT_BONUS_MESSAGE = "Bonus Treat! You've won a random Waifu NFT"
+TRICK_OR_TREAT_BONUS_LOG = " Lucky trick or treat bonus drop!"
+TRICK_OR_TREAT_TRICK_MESSAGE = "Trick! You didn't get lucky today."
+TRICK_OR_TREAT_LOG_MESSAGE = " Trick or Treat drop from daily command" 
+TRICK_OR_TREAT_MEMO = "Treat! You've won some candy"
 
 # AH-Collection Book Schema util:
 TEMPLATE_TO_IGNORE = []  # Templates to not include in collection book

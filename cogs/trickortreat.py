@@ -39,7 +39,7 @@ class TrickOrTreat(commands.Cog):
 
         userid = ctx.author.id
 
-        current_time = int(datetime.datetime.timestamp(datetime.datetime.now()))
+        # current_time = int(datetime.datetime.timestamp(datetime.datetime.now()))
         if userid in self.used_treat and self.used_treat[
             userid
         ] == date.today().strftime("%d-%m"):
@@ -52,24 +52,24 @@ class TrickOrTreat(commands.Cog):
             return
         self.used_treat[userid] = date.today().strftime("%d-%m")
         # 4h Cooldown: self.used_treat[userid] = current_time
-        await ctx.message.add_reaction("🏡")
+        await ctx.message.add_reaction(settings.TRICK_OR_TREAT_EMOJIS[0])
 
         randomness = secrets.randbelow(100)
 
         if (
             len([role.id for role in ctx.author.roles if role.id in settings.TRICK_OR_TREAT_LUCKY_ROLES]) > 1
-            and randomness < 10
+            and randomness < settings.TRICK_OR_TREAT_BONUS_ODDS
         ):
             # Lucky role: 10% chance to get a normal drop
-            await ctx.channel.send("Bonus Prize! Enjoy a pink fairy NFT drop")
+            await ctx.channel.send(settings.TRICK_OR_TREAT_BONUS_MESSAGE)
 
-            log_additional = f" Lucky trick or treat bonus drop!"
+            log_additional = settings.TRICK_OR_TREAT_BONUS_LOG
             try:
                 await utils.drop_random_from_wallet(
                     bot=self.bot,
                     drop_message=ctx.message,
                     member=ctx.author,
-                    memo="Bonus Treat! You've won a random Waifu NFT",
+                    memo=settings.TRICK_OR_TREAT_BONUS_MESSAGE,
                     log_additional=log_additional,
                     emoji_sequences=settings.TRICK_OR_TREAT_BONUS_EMOJIS,
                 )
@@ -77,19 +77,18 @@ class TrickOrTreat(commands.Cog):
                 print(f"Ran into an error. Please ping {settings.MAINTAINER}!")
                 print(e)
 
-        elif randomness < 25:
-            # 25% chance (or 15% for lucky role members) for a timeout
+        elif randomness < settings.TRICK_OR_TREAT_TIMEOUT_ODDS:
             timeout_duration = secrets.randbelow(300) + 15
             timeout = 0
-            if userid in self.last_timeouts:
-                timeout = self.last_timeouts[userid] ** 2 // 60
-            await ctx.message.add_reaction("🥚")
-            await ctx.channel.send("Trick! You didn't get lucky today!")
+            #if userid in self.last_timeouts:
+            #    timeout = self.last_timeouts[userid] ** 2 // 60
+            await ctx.message.add_reaction(settings.TRICK_OR_TREAT_EMOJIS[1])
+            await ctx.channel.send(settings.TRICK_OR_TREAT_TRICK_MESSAGE)
             try:
                 await ctx.author.timeout(
                     discord.utils.utcnow()
                     + datetime.timedelta(seconds=timeout_duration + timeout),
-                    reason="Trick! You didn't get lucky today",
+                    reason=settings.TRICK_OR_TREAT_TRICK_MESSAGE,
                 )
                 self.last_timeouts[userid] = timeout_duration
             except Exception as e:
@@ -97,14 +96,14 @@ class TrickOrTreat(commands.Cog):
             return
         try:
             self.last_timeouts[userid] = 0
-            log_additional = f" Trick or Treat drop from daily command."
+            log_additional = settings.TRICK_OR_TREAT_LOG_MESSAGE
             await utils.drop_random_from_wallet(
                 bot=self.bot,
                 drop_message=ctx.message,
                 member=ctx.author,
-                memo="Treat! You've won some candy",
+                memo=settings.TRICK_OR_TREAT_MEMO,
                 log_additional=log_additional,
-                emoji_sequences=["👻", "🍬"],
+                emoji_sequences=settings.TRICK_OR_TREAT_EMOJIS[2:],
                 account=special_wallet,
             )
 
