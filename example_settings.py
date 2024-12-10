@@ -10,6 +10,7 @@ DEFAULT_DROP_MEMO = "Congratulations you've won a random NFT!"  # Default Drop m
 DROP_EXTRA_INFO = " Remember to claim this link, otherwise all unclaimed links may be reclaimed after 31 days!"  # Extra information to include with drop memos
 COLLECTION_NAME = ""  # Target collection
 MAINTAINER = "Majic"  # Your name here
+PING_WHEN_WALLET_IS_LOW = 0 # Person that gets pinged when the used wallet is running low on NFTs
 
 # Drop Settings
 DAILY_DROP_LIMIT = 100  # Daily drop limit for those with perms

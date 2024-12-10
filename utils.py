@@ -245,7 +245,7 @@ try:
         # alerts when wallet low on assets:
         if len(available_assets) <= 25 and len(available_assets) % 10 == 5:
             await drop_message.channel.send(
-                f"Warning <@1161686466762657853> - only {len(available_assets)} assets left in {sender}"
+                f"Warning <@{settings.PING_WHEN_WALLET_IS_LOW}> - only {len(available_assets)} assets left in {sender}"
             )
         choosen_asset = secrets.choice(available_assets)
         to_send = choosen_asset["asset_id"]
@@ -485,13 +485,13 @@ try:
                 return True, resp
             except Exception as e:
                 try:
-                    if e.args[0]["code"] == 3050003:
+                    if e.args[0]["code"] == 3050003 or e.args[0]["code"] == 3080001:
                         try:
                             if (
                                 "has insufficient ram;"
                                 in e.args[0]["details"][0]["message"]
                             ):
-                                return False, "Failed to create claimlink"
+                                return False, "Failed to create claimlink - not enough ram"
                         except:
                             pass
                         print(e)
